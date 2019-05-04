@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>列车运行图管理系统</title>
+		<style type="text/css">
+			/* *{
+				margin:0;
+				padding:0;
+			} */
+			body{
+				text-align: center;
+				width:100%;
+				height:100%;
+				
+				 
+			}
+			.jiemian{
+				margin:0 auto;
+				width:950px;
+			}
+			.biaoti{
+				width:950px;
+				text-align: center;
+				background-color: #BBFFAA;
+				
+				
+			}
+			.biaoge{
+				float:left;
+				width:150px;
+				height:500px;
+				background-color: lightgray;
+				text-align: center;
+				
+			}
+			.yunxingtu{
+				float:left;
+				width:800px;
+				height:500px;
+				background: /* url(img/123.svg) no-repeat */ lightgoldenrodyellow;
+				
+			}
+			select{
+				background-color: lightgray;
+			}	
+			img{
+				width:100%;
+				height:100%;
+			}
+		</style>
+		<script>
+			
+			window.onload = function(){
+				var butt = document.getElementById("butt");
+				var del = document.getElementById("del");
+				//var svg = document.getElementsByTagName("img")[0];
+				var svg = document.getElementById("main");
+				//var svgname = ["img/1.svg","img/2.svg","img/3.svg","img/4.svg","img/5.svg"]
+				
+				var i = 1;
+				var j = 0;
+				var g;
+				var stationNum = 0;
+				var directNum = 0;
+				var bjzzb = 50, tjzzb = 120, jnzzb = 230, njzzb = 350, shzzb = 450;
+				var kshzb = 50, x2; //开始横坐标
+				var k ;  //斜率
+				var tingchetime; //停车时间
+				var dianjicishu = 0;
+				var a=[],b=[],c=[],d=[],e=[],f=[],h=[];   //a表示坐标 b表示经停 c防止重复生成
+				for(i=0;i<52;i++){
+					c[i] = 0;
+				}
+				for(i=0;i<52;i++){
+					d[i] = 0;
+				}
+				for(i=0;i<52;i++){
+					e[i] = 0;
+				}
+				for(i=0;i<52;i++){
+					f[i] = 0;
+				}
+				for(i=0;i<52;i++){
+					h[i] = 0;
+				}
+				i = 1;
+				var flag = 1;
+				
+				var checix, checiy, numx, numy;
+				var liechehao = 1;
+				var stationName = document.getElementsByName("station");
+				var direction = document.getElementsByName("direction");
+				var stoptime = document.getElementById("stoptime");
+				var speed = document.getElementById("speed");
+				var zhexian = document.getElementById("zhexian");
+				//var g1 = document.getElementById( "g1" );
+				/* var main = document.getElementById( "main" );
+				var rect = document.createElementNS( "http://www.w3.org/2000/svg", "rect" );
+				rect.setAttribute( "width", 100 );
+				rect.setAttribute( "height", 30 );
+				rect.setAttribute( "style", "fill:rgb(0,0,255);stroke-width:1;stroke:rgb(0,0,0)" );
+				main.appendChild( rect ); */
+				del.onclick = function(){
+					svg.removeChild(g1);
+					dianjicishu = 0;
+					liechehao = 1;
+					for(i=0;i<52;i++){
+						c[i] = 0;
+					}
+					for(i=0;i<52;i++){
+						d[i] = 0;
+					}
+					for(i=0;i<52;i++){
+						e[i] = 0;
+					}
+					for(i=0;i<52;i++){
+						f[i] = 0;
+					}
+					for(i=0;i<52;i++){
+						h[i] = 0;
+					}
+					i = 1;
+				};
+				
+				butt.onclick = function(){
+					//removeChild(svg);
+					flag = 1;
+					dianjicishu++;
+					stationNum=0;
+					directNum=0;
+					/* if(kshzb>500){kshzb = 50;} */
+					kshzb = 50;
+					if(stoptime.selectedIndex==0){
+						tingchetime = 8;	tag1 = 0;								
+					}else{
+						tingchetime = 20;	tag1 = 1;
+					}
+					if(speed.selectedIndex==0){
+						k = 1.6;			tag2 = 0;
+					}else{
+						k = 1.3;			tag2 = 1;
+					}
+					for(j=0;j<stationName.length;j++)
+					{
+						if(stationName[j].checked){
+							stationNum++;
+						}
+					}
+					for(j=0;j<2;j++)
+					{
+						if(direction[j].checked){
+							directNum++;
+						}
+					}
+					if(stationNum<2&&directNum<1){
+						alert("请至少勾选2个车站并选择列车运行方向！");
+					}else if(stationNum<2)
+					{
+						alert("请至少勾选两个车站！");
+					}
+					else if(directNum<1){
+						alert("请选择列车运行方向！");
+					}
+					
+					else{
+						
+						if(direction[0].checked){
+							if(stationNum==5){
+								//1
+								a[0] = bjzzb; a[1] = tjzzb; a[2] = jnzzb; a[3] = njzzb; a[4] = shzzb;
+								var b = [1,1,1,1,1];
+								c[0]++;
+								if(tag1){
+									if(tag2){
+										d[0]++;
+									}else{
+										e[0]++;
+									}
+								}
+								else{
+									if(tag2){
+										f[0]++;
+									}else{
+										h[0]++;
+									}
+								}
+							}
+							if(stationNum==4){
+								
+								if(stationName[0].checked==false){//2
+									a[0] = tjzzb; a[1] = jnzzb; a[2] = njzzb; a[3] = shzzb; a[4] = 0;
+									var b = [1,1,1,1,0];
+									c[1]++;
+									if(tag1){
+										if(tag2){
+											d[1]++;
+										}else{
+											e[1]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[1]++;
+										}else{
+											h[1]++;
+										}
+									}
+								}
+								
+								if(stationName[1].checked==false){//3
+									a[0] = bjzzb; a[1] = tjzzb; a[2] = jnzzb; a[3] = njzzb; a[4] = shzzb;
+									var b = [1,0,1,1,1];
+									c[2]++;
+									if(tag1){
+										if(tag2){
+											d[2]++;
+										}else{
+											e[2]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[2]++;
+										}else{
+											h[2]++;
+										}
+									}
+								}
+								
+								if(stationName[2].checked==false){//4
+									a[0] = bjzzb; a[1] = tjzzb; a[2] = jnzzb; a[3] = njzzb; a[4] = shzzb;
+									var b = [1,1,0,1,1];
+									c[3]++;
+									if(tag1){
+										if(tag2){
+											d[3]++;
+										}else{
+											e[3]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[3]++;
+										}else{
+											h[3]++;
+										}
+									}
+								}
+								
+								if(stationName[3].checked==false){//5
+									a[0] = bjzzb; a[1] = tjzzb; a[2] = jnzzb; a[3] = njzzb; a[4] = shzzb;
+									var b = [1,1,1,0,1];
+									c[4]++;
+									if(tag1){
+										if(tag2){
+											d[4]++;
+										}else{
+											e[4]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[4]++;
+										}else{
+											h[4]++;
+										}
+									}
+								}
+								
+								if(stationName[4].checked==false){//6
+									a[0] = bjzzb; a[1] = tjzzb; a[2] = jnzzb; a[3] = njzzb; a[4] = 0;
+									var b = [1,1,1,1,0];
+									c[5]++;
+									if(tag1){
+										if(tag2){
+											d[5]++;
+										}else{
+											e[5]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[5]++;
+										}else{
+											h[5]++;
+										}
+									}
+								}
+								
+							}
+							
+							if(stationNum==3){
+								if(stationName[0].checked==false&&stationName[1].checked==false){//7
+									a[0] = jnzzb; a[1] = njzzb; a[2] = shzzb; a[3] = 0; a[4] = 0;
+									var b = [1,1,1,0,0];
+									c[6]++;
+									if(tag1){
+										if(tag2){
+											d[6]++;
+										}else{
+											e[6]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[6]++;
+										}else{
+											h[6]++;
+										}
+									}
+								}
+								if(stationName[0].checked==false&&stationName[2].checked==false){//8
+									a[0] = tjzzb; a[1] = jnzzb; a[2] = njzzb; a[3] = shzzb; a[4] = 0;
+									var b = [1,0,1,1,0];
+									c[7]++;
+									if(tag1){
+										if(tag2){
+											d[7]++;
+										}else{
+											e[7]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[7]++;
+										}else{
+											h[7]++;
+										}
+									}
+								}
+								if(stationName[0].checked==false&&stationName[3].checked==false){//9
+									a[0] = tjzzb; a[1] = jnzzb; a[2] = njzzb; a[3] = shzzb; a[4] = 0;
+									var b = [1,1,0,1,0];
+									c[8]++;
+									if(tag1){
+										if(tag2){
+											d[8]++;
+										}else{
+											e[8]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[8]++;
+										}else{
+											h[8]++;
+										}
+									}
+								}
+								if(stationName[0].checked==false&&stationName[4].checked==false){//10
+									a[0] = tjzzb; a[1] = jnzzb; a[2] = njzzb; a[3] = 0; a[4] = 0;
+									var b = [1,1,1,0,0];
+									c[9]++;
+									if(tag1){
+										if(tag2){
+											d[9]++;
+										}else{
+											e[9]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[9]++;
+										}else{
+											h[9]++;
+										}
+									}
+								}
+								if(stationName[1].checked==false&&stationName[2].checked==false){//11
+									a[0] = bjzzb; a[1] = tjzzb; a[2] = jnzzb; a[3] = njzzb; a[4] = shzzb;
+									var b = [1,0,0,1,1];
+									c[10]++;
+									if(tag1){
+										if(tag2){
+											d[10]++;
+										}else{
+											e[10]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[10]++;
+										}else{
+											h[10]++;
+										}
+									}
+								}
+								if(stationName[1].checked==false&&stationName[3].checked==false){//12
+									a[0] = bjzzb; a[1] = tjzzb; a[2] = jnzzb; a[3] = njzzb; a[4] = shzzb;
+									var b = [1,0,1,0,1];
+									c[11]++;
+									if(tag1){
+										if(tag2){
+											d[11]++;
+										}else{
+											e[11]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[11]++;
+										}else{
+											h[11]++;
+										}
+									}
+								}
+								if(stationName[1].checked==false&&stationName[4].checked==false){//13
+									a[0] = bjzzb; a[1] = tjzzb; a[2] = jnzzb; a[3] = njzzb; a[4] = 0;
+									var b = [1,0,1,1,0];
+									c[12]++;
+									if(tag1){
+										if(tag2){
+											d[12]++;
+										}else{
+											e[12]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[12]++;
+										}else{
+											h[12]++;
+										}
+									}
+								}
+								if(stationName[2].checked==false&&stationName[3].checked==false){//14
+									a[0] = bjzzb; a[1] = tjzzb; a[2] = jnzzb; a[3] = njzzb; a[4] = shzzb;
+									var b = [1,1,0,0,1];
+									c[13]++;
+									if(tag1){
+										if(tag2){
+											d[13]++;
+										}else{
+											e[13]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[13]++;
+										}else{
+											h[13]++;
+										}
+									}
+								}
+								if(stationName[2].checked==false&&stationName[4].checked==false){//15
+									a[0] = bjzzb; a[1] = tjzzb; a[2] = jnzzb; a[3] = njzzb; a[4] = 0;
+									var b = [1,1,0,1,0];
+									c[14]++;
+									if(tag1){
+										if(tag2){
+											d[14]++;
+										}else{
+											e[14]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[14]++;
+										}else{
+											h[14]++;
+										}
+									}
+								}
+								if(stationName[3].checked==false&&stationName[4].checked==false){//16
+									a[0] = bjzzb; a[1] = tjzzb; a[2] = jnzzb; a[3] = 0; a[4] = 0;
+									var b = [1,1,1,0,0];
+									c[15]++;
+									if(tag1){
+										if(tag2){
+											d[15]++;
+										}else{
+											e[15]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[15]++;
+										}else{
+											h[15]++;
+										}
+									}
+								}
+							}
+							if(stationNum==2){
+								if(stationName[0].checked==true&&stationName[1].checked==true){//17
+									a[0] = bjzzb; a[1] = tjzzb; a[2] = 0; a[3] = 0; a[4] = 0;
+									var b = [1,1,0,0,0];
+									c[16]++;
+									if(tag1){
+										if(tag2){
+											d[16]++;
+										}else{
+											e[16]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[16]++;
+										}else{
+											h[16]++;
+										}
+									}
+								}
+								if(stationName[0].checked==true&&stationName[2].checked==true){//18
+									a[0] = bjzzb; a[1] = tjzzb; a[2] = jnzzb; a[3] = 0; a[4] = 0;
+									var b = [1,0,1,0,0];
+									c[17]++;
+									if(tag1){
+										if(tag2){
+											d[17]++;
+										}else{
+											e[17]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[17]++;
+										}else{
+											h[17]++;
+										}
+									}
+								}
+								if(stationName[0].checked==true&&stationName[3].checked==true){//19
+									a[0] = bjzzb; a[1] = tjzzb; a[2] = jnzzb; a[3] = njzzb; a[4] = 0;
+									var b = [1,0,0,1,0];
+									c[18]++;
+									if(tag1){
+										if(tag2){
+											d[18]++;
+										}else{
+											e[18]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[18]++;
+										}else{
+											h[18]++;
+										}
+									}
+								}
+								if(stationName[0].checked==true&&stationName[4].checked==true){//20
+									a[0] = bjzzb; a[1] = tjzzb; a[2] = jnzzb; a[3] = njzzb; a[4] = shzzb;
+									var b = [1,0,0,0,1];
+									c[19]++;
+									if(tag1){
+										if(tag2){
+											d[19]++;
+										}else{
+											e[19]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[19]++;
+										}else{
+											h[19]++;
+										}
+									}
+								}
+								if(stationName[1].checked==true&&stationName[2].checked==true){//21
+									a[0] = tjzzb; a[1] = jnzzb; a[2] = 0; a[3] = 0; a[4] = 0;
+									var b = [1,1,0,0,0];
+									c[20]++;
+									if(tag1){
+										if(tag2){
+											d[20]++;
+										}else{
+											e[20]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[20]++;
+										}else{
+											h[20]++;
+										}
+									}
+								}
+								if(stationName[1].checked==true&&stationName[3].checked==true){//22
+									a[0] = tjzzb; a[1] = jnzzb; a[2] = njzzb; a[3] = 0; a[4] = 0;
+									var b = [1,0,1,0,0];
+									c[21]++;
+									if(tag1){
+										if(tag2){
+											d[21]++;
+										}else{
+											e[21]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[21]++;
+										}else{
+											h[21]++;
+										}
+									}
+								}
+								if(stationName[1].checked==true&&stationName[4].checked==true){//23
+									a[0] = tjzzb; a[1] = jnzzb; a[2] = njzzb; a[3] = shzzb; a[4] = 0;
+									var b = [1,0,0,1,0];
+									c[22]++;
+									if(tag1){
+										if(tag2){
+											d[22]++;
+										}else{
+											e[22]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[22]++;
+										}else{
+											h[22]++;
+										}
+									}
+								}
+								if(stationName[2].checked==true&&stationName[3].checked==true){//24
+									a[0] = jnzzb; a[1] = njzzb; a[2] = 0; a[3] = 0; a[4] = 0;
+									var b = [1,1,0,0,0];
+									c[23]++;
+									if(tag1){
+										if(tag2){
+											d[23]++;
+										}else{
+											e[23]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[23]++;
+										}else{
+											h[23]++;
+										}
+									}
+								}
+								if(stationName[2].checked==true&&stationName[4].checked==true){//25
+									a[0] = jnzzb; a[1] = njzzb; a[2] = shzzb; a[3] = 0; a[4] = 0;
+									var b = [1,0,1,0,0];
+									c[24]++;
+									if(tag1){
+										if(tag2){
+											d[24]++;
+										}else{
+											e[24]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[24]++;
+										}else{
+											h[24]++;
+										}
+									}
+								}
+								if(stationName[3].checked==true&&stationName[4].checked==true){//26
+									a[0] = njzzb; a[1] = shzzb; a[2] = 0; a[3] = 0; a[4] = 0;
+									var b = [1,1,0,0,0];
+									c[25]++;
+									if(tag1){
+										if(tag2){
+											d[25]++;
+										}else{
+											e[25]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[25]++;
+										}else{
+											h[25]++;
+										}
+									}
+								}
+							}
+							
+						}else{
+							if(stationNum==5){//27
+								
+								a[0] = shzzb; a[1] = njzzb; a[2] = jnzzb; a[3] = tjzzb; a[4] = bjzzb;
+								var b = [1,1,1,1,1];
+								c[26]++;
+								if(tag1){
+									if(tag2){
+										d[26]++;
+									}else{
+										e[26]++;
+									}
+								}
+								else{
+									if(tag2){
+										f[26]++;
+									}else{
+										h[26]++;
+									}
+								}
+							}
+							if(stationNum==4){
+								
+								if(stationName[0].checked==false){//28
+									a[0] = shzzb; a[1] = njzzb; a[2] = jnzzb; a[3] = tjzzb; a[4] = 0;
+									var b = [1,1,1,1,0];
+									c[27]++;
+									if(tag1){
+										if(tag2){
+											d[27]++;
+										}else{
+											e[27]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[27]++;
+										}else{
+											h[27]++;
+										}
+									}
+								}
+								
+								if(stationName[1].checked==false){//29
+									a[0] = shzzb; a[1] = njzzb; a[2] = jnzzb; a[3] = tjzzb; a[4] = bjzzb;
+									var b = [1,1,1,0,1];
+									c[28]++;
+									if(tag1){
+										if(tag2){
+											d[28]++;
+										}else{
+											e[28]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[28]++;
+										}else{
+											h[28]++;
+										}
+									}
+								}
+								
+								if(stationName[2].checked==false){//30
+									a[0] = shzzb; a[1] = njzzb; a[2] = jnzzb; a[3] = tjzzb; a[4] = bjzzb;
+									var b = [1,1,0,1,1];
+									c[29]++;
+									if(tag1){
+										if(tag2){
+											d[29]++;
+										}else{
+											e[29]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[29]++;
+										}else{
+											h[29]++;
+										}
+									}
+								}
+								
+								if(stationName[3].checked==false){//31
+									a[0] = shzzb; a[1] = njzzb; a[2] = jnzzb; a[3] = tjzzb; a[4] = bjzzb;
+									var b = [1,0,1,1,1];
+									c[30]++;
+									if(tag1){
+										if(tag2){
+											d[30]++;
+										}else{
+											e[30]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[30]++;
+										}else{
+											h[30]++;
+										}
+									}
+								}
+								
+								if(stationName[4].checked==false){//32
+									a[0] = njzzb; a[1] = jnzzb; a[2] = tjzzb; a[3] = bjzzb; a[4] = 0;
+									var b = [0,1,1,1,1];
+									c[31]++;
+									if(tag1){
+										if(tag2){
+											d[31]++;
+										}else{
+											e[31]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[31]++;
+										}else{
+											h[31]++;
+										}
+									}
+								}
+								
+							}
+							
+							if(stationNum==3){
+								if(stationName[0].checked==false&&stationName[1].checked==false){//33
+									a[0] = shzzb; a[1] = njzzb; a[2] = jnzzb; a[3] = 0; a[4] = 0;
+									var b = [1,1,1,0,0];
+									c[32]++;
+									if(tag1){
+										if(tag2){
+											d[32]++;
+										}else{
+											e[32]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[32]++;
+										}else{
+											h[32]++;
+										}
+									}
+								}
+								if(stationName[0].checked==false&&stationName[2].checked==false){//34
+									a[0] = shzzb; a[1] = njzzb; a[2] = jnzzb; a[3] = tjzzb; a[4] = 0;
+									var b = [1,1,0,1,0];
+									c[33]++;
+									if(tag1){
+										if(tag2){
+											d[33]++;
+										}else{
+											e[33]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[33]++;
+										}else{
+											h[33]++;
+										}
+									}
+								}
+								if(stationName[0].checked==false&&stationName[3].checked==false){//35
+									a[0] = shzzb; a[1] = njzzb; a[2] = jnzzb; a[3] = tjzzb; a[4] = 0;
+									var b = [1,0,1,1,0];
+									c[34]++;
+									if(tag1){
+										if(tag2){
+											d[34]++;
+										}else{
+											e[34]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[34]++;
+										}else{
+											h[34]++;
+										}
+									}
+								}
+								if(stationName[0].checked==false&&stationName[4].checked==false){//36
+									a[0] = njzzb; a[1] = jnzzb; a[2] = tjzzb; a[3] = 0; a[4] = 0;
+									var b = [1,1,1,0,0];
+									c[35]++;
+									if(tag1){
+										if(tag2){
+											d[35]++;
+										}else{
+											e[35]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[35]++;
+										}else{
+											h[35]++;
+										}
+									}
+								}
+								if(stationName[1].checked==false&&stationName[2].checked==false){//37
+									a[0] = shzzb; a[1] = njzzb; a[2] = jnzzb; a[3] = tjzzb; a[4] = bjzzb;
+									var b = [1,1,0,0,1];
+									c[36]++;
+									if(tag1){
+										if(tag2){
+											d[36]++;
+										}else{
+											e[36]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[36]++;
+										}else{
+											h[36]++;
+										}
+									}
+								}
+								if(stationName[1].checked==false&&stationName[3].checked==false){//38
+									a[0] = shzzb; a[1] = njzzb; a[2] = jnzzb; a[3] = tjzzb; a[4] = bjzzb;
+									var b = [1,0,1,0,1];
+									c[37]++;
+									if(tag1){
+										if(tag2){
+											d[37]++;
+										}else{
+											e[37]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[37]++;
+										}else{
+											h[37]++;
+										}
+									}
+								}
+								if(stationName[1].checked==false&&stationName[4].checked==false){//39
+									a[0] = njzzb; a[1] = jnzzb; a[2] = tjzzb; a[3] = bjzzb; a[4] = 0;
+									var b = [1,1,0,1,0];
+									c[38]++;
+									if(tag1){
+										if(tag2){
+											d[38]++;
+										}else{
+											e[38]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[38]++;
+										}else{
+											h[38]++;
+										}
+									}
+								}
+								if(stationName[2].checked==false&&stationName[3].checked==false){//40
+									a[0] = shzzb; a[1] = njzzb; a[2] = jnzzb; a[3] = tjzzb; a[4] = bjzzb;
+									var b = [1,0,0,1,1];
+									c[39]++;
+									if(tag1){
+										if(tag2){
+											d[39]++;
+										}else{
+											e[39]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[39]++;
+										}else{
+											h[39]++;
+										}
+									}
+								}
+								if(stationName[2].checked==false&&stationName[4].checked==false){//41
+									a[0] = njzzb; a[1] = jnzzb; a[2] = tjzzb; a[3] = bjzzb; a[4] = 0;
+									var b = [0,1,0,1,1];
+									c[40]++;
+									if(tag1){
+										if(tag2){
+											d[40]++;
+										}else{
+											e[40]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[40]++;
+										}else{
+											h[40]++;
+										}
+									}
+								}
+								if(stationName[3].checked==false&&stationName[4].checked==false){//42
+									a[0] = jnzzb; a[1] = tjzzb; a[2] = bjzzb; a[3] = 0; a[4] = 0;
+									var b = [1,1,1,0,0];
+									c[41]++;
+									if(tag1){
+										if(tag2){
+											d[41]++;
+										}else{
+											e[41]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[41]++;
+										}else{
+											h[41]++;
+										}
+									}
+								}
+							}
+							if(stationNum==2){
+								if(stationName[0].checked==true&&stationName[1].checked==true){//43
+									a[0] = tjzzb; a[1] = bjzzb; a[2] = 0; a[3] = 0; a[4] = 0;
+									var b = [1,1,0,0,0];
+									c[42]++;
+									if(tag1){
+										if(tag2){
+											d[42]++;
+										}else{
+											e[42]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[42]++;
+										}else{
+											h[42]++;
+										}
+									}
+								}
+								if(stationName[0].checked==true&&stationName[2].checked==true){//44
+									a[0] = jnzzb; a[1] = tjzzb; a[2] = bjzzb; a[3] = 0; a[4] = 0;
+									var b = [1,0,1,0,0];
+									c[43]++;
+									if(tag1){
+										if(tag2){
+											d[43]++;
+										}else{
+											e[43]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[43]++;
+										}else{
+											h[43]++;
+										}
+									}
+								}
+								if(stationName[0].checked==true&&stationName[3].checked==true){//45
+									a[0] = njzzb; a[1] = jnzzb; a[2] = tjzzb; a[3] = bjzzb; a[4] = 0;
+									var b = [1,0,0,1,0];
+									c[44]++;
+									if(tag1){
+										if(tag2){
+											d[44]++;
+										}else{
+											e[44]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[44]++;
+										}else{
+											h[44]++;
+										}
+									}
+								}
+								if(stationName[0].checked==true&&stationName[4].checked==true){//46
+									a[0] = shzzb; a[1] = njzzb; a[2] = jnzzb; a[3] = tjzzb; a[4] = bjzzb;
+									var b = [1,0,0,0,1];
+									c[45]++;
+									if(tag1){
+										if(tag2){
+											d[45]++;
+										}else{
+											e[45]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[45]++;
+										}else{
+											h[45]++;
+										}
+									}
+								}
+								if(stationName[1].checked==true&&stationName[2].checked==true){//47
+									a[0] = jnzzb; a[1] = tjzzb; a[2] = 0; a[3] = 0; a[4] = 0;
+									var b = [1,1,0,0,0];
+									c[46]++;
+									if(tag1){
+										if(tag2){
+											d[46]++;
+										}else{
+											e[46]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[46]++;
+										}else{
+											h[46]++;
+										}
+									}
+								}
+								if(stationName[1].checked==true&&stationName[3].checked==true){//48
+									a[0] = njzzb; a[1] = jnzzb; a[2] = tjzzb; a[3] = 0; a[4] = 0;
+									var b = [1,0,1,0,0];
+									c[47]++;
+									if(tag1){
+										if(tag2){
+											d[47]++;
+										}else{
+											e[47]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[47]++;
+										}else{
+											h[47]++;
+										}
+									}
+								}
+								if(stationName[1].checked==true&&stationName[4].checked==true){//49
+									a[0] = shzzb; a[1] = njzzb; a[2] = jnzzb; a[3] = tjzzb; a[4] = 0;
+									var b = [1,0,0,1,0];
+									c[48]++;
+									if(tag1){
+										if(tag2){
+											d[48]++;
+										}else{
+											e[48]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[48]++;
+										}else{
+											h[48]++;
+										}
+									}
+								}
+								if(stationName[2].checked==true&&stationName[3].checked==true){//50
+									a[0] = njzzb; a[1] = jnzzb; a[2] = 0; a[3] = 0; a[4] = 0;
+									var b = [1,1,0,0,0];
+									c[49]++;
+									if(tag1){
+										if(tag2){
+											d[49]++;
+										}else{
+											e[49]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[49]++;
+										}else{
+											h[49]++;
+										}
+									}
+								}
+								if(stationName[2].checked==true&&stationName[4].checked==true){//51
+									a[0] = shzzb; a[1] = njzzb; a[2] = jnzzb; a[3] = 0; a[4] = 0;
+									var b = [1,0,1,0,0];
+									c[50]++;
+									if(tag1){
+										if(tag2){
+											d[50]++;
+										}else{
+											e[50]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[50]++;
+										}else{
+											h[50]++;
+										}
+									}
+								}
+								if(stationName[3].checked==true&&stationName[4].checked==true){//52
+									a[0] = shzzb; a[1] = njzzb; a[2] = 0; a[3] = 0; a[4] = 0;
+									var b = [1,1,0,0,0];
+									c[51]++;
+									if(tag1){
+										if(tag2){
+											d[51]++;
+										}else{
+											e[51]++;
+										}
+									}
+									else{
+										if(tag2){
+											f[51]++;
+										}else{
+											h[51]++;
+										}
+									}
+								}
+							}
+						}
+						
+
+						if(dianjicishu<2){
+								var g = document.createElementNS( "http://www.w3.org/2000/svg", "g");
+								g.setAttribute("id","g1");
+								svg.appendChild(g);
+							}
+							
+							
+						//00 01 10 11	
+						for(g=0;g<52;g++){
+							
+							//if(c[g]>1){
+								/* c[g] = 1;
+								if(c[52]&&c[53]) */
+								
+								if(d[g]>1){
+									d[g] = 1;
+									flag = 0;
+								}
+								if(e[g]>1){
+									e[g] = 1;
+									flag = 0;
+								}
+								if(f[g]>1){
+									f[g] = 1;
+									flag = 0;
+								}
+								if(h[g]>1){
+									h[g] = 1;
+									flag = 0;
+								}
+							//}
+						}
+						
+						
+						if(flag){
+							var g1 = document.getElementById( "g1" );
+							
+							var line = document.createElementNS( "http://www.w3.org/2000/svg", "line" );
+							//var y=xmlDoc.getElementsByTagName("book")[0];
+							//xmlDoc.documentElement.removeChild(g1);
+							if(direction[0].checked){
+								x2 = (a[1]-a[0])*k+kshzb;
+							}else{
+								x2 = (Math.abs(a[1]-a[0]))*k+kshzb;
+							}
+							
+							line.setAttribute( "x1", kshzb );
+							line.setAttribute( "y1", a[0] );
+							line.setAttribute( "x2", x2 );
+							line.setAttribute( "y2", a[1]);
+							line.setAttribute( "style", "stroke-width:1;stroke:rgb(0,0,0)" );
+							g1.appendChild( line );
+							
+							var anum = document.createElementNS( "http://www.w3.org/2000/svg", "text" );
+							/* numx = kshzb;
+							numy = bjzzb; */
+							var anumx,anumy;
+							if(direction[0].checked){
+								anumx = kshzb+2;
+								anumy = a[0]+22;
+							}else{
+								anumx = kshzb+2;
+								anumy = a[0]-8;
+							}
+							anum.setAttribute( "text-anchor", "start" );
+							anum.setAttribute( "x", anumx);
+							anum.setAttribute( "y", anumy );
+							anum.setAttribute( "style", "fill:black" );
+							anum.textContent = kshzb%10;
+							g1.appendChild( anum );
+							
+							var b1 = document.createElementNS( "http://www.w3.org/2000/svg", "text" );
+							/* numx = kshzb;
+							numy = bjzzb; */
+							var b1y;
+							if(direction[0].checked){
+								b1y = a[1]-4;
+							}else{
+								b1y = a[1]+18;
+							}
+							b1.setAttribute( "text-anchor", "middle" );
+							b1.setAttribute( "x", x2 );
+							b1.setAttribute( "y", b1y );
+							b1.setAttribute( "style", "fill:black" );
+							b1.textContent = parseInt((x2-50)%40/4);
+							g1.appendChild( b1 );
+							
+								
+							
+							
+							
+							
+							var checi = document.createElementNS( "http://www.w3.org/2000/svg", "text" );
+							checix = (x2+kshzb)/2;
+							checiy = (a[0]+a[1])/2;
+							var chex,chey;
+							if(direction[0].checked){
+								chex = checix-8;
+								chey = checiy+8;
+							}else{
+								chex = checix+8;
+								chey = checiy-8;
+							}
+							checi.setAttribute( "text-anchor", "end" );
+							checi.setAttribute( "x", chex );
+							checi.setAttribute( "y", chey );
+							checi.setAttribute( "style", "fill:black font-size:20" );
+							checi.textContent = "G"+liechehao;
+							liechehao++;
+							g1.appendChild( checi );
+							
+							
+							if(a[2]!=0){
+								if(b[1]==0){
+									var line2 = document.createElementNS( "http://www.w3.org/2000/svg", "line" );
+									kshzb = x2;
+									line2.setAttribute( "x1", kshzb );
+									line2.setAttribute( "y1", a[1] );
+									if(direction[0].checked){
+										x2 = (a[2]-a[1])*k+kshzb;
+									}else{
+										x2 = (Math.abs(a[2]-a[1]))*k+kshzb;
+									}
+									//x2 = (a[2]-a[1])*k+kshzb;
+									line2.setAttribute( "x2", x2 );
+									line2.setAttribute( "y2", a[2] );
+									line2.setAttribute( "style", "stroke-width:1;stroke:rgb(0,0,0)" );
+									g1.appendChild( line2 );
+									
+									var c1 = document.createElementNS( "http://www.w3.org/2000/svg", "text" );
+									/* numx = kshzb;
+									numy = bjzzb; */
+									var c1y;
+									if(direction[0].checked){
+										c1y = a[2]-4;
+									}else{
+										c1y = a[2]+18;
+									}
+									c1.setAttribute( "text-anchor", "middle" );
+									c1.setAttribute( "x", x2 );
+									c1.setAttribute( "y", c1y );
+									c1.setAttribute( "style", "fill:black" );
+									c1.textContent =parseInt((x2-50)%40/4);
+									g1.appendChild( c1 );
+								}else{
+									var line2 = document.createElementNS( "http://www.w3.org/2000/svg", "line" );
+									kshzb = x2+tingchetime;
+									line2.setAttribute( "x1", kshzb );
+									line2.setAttribute( "y1", a[1] );
+									if(direction[0].checked){
+										x2 = (a[2]-a[1])*k+kshzb;
+									}else{
+										x2 = (Math.abs(a[2]-a[1]))*k+kshzb;
+									}
+									//x2 = (a[2]-a[1])*k+kshzb;
+									line2.setAttribute( "x2", x2 );
+									line2.setAttribute( "y2", a[2] );
+									line2.setAttribute( "style", "stroke-width:1;stroke:rgb(0,0,0)" );
+									g1.appendChild( line2 );
+									
+									var b2 = document.createElementNS( "http://www.w3.org/2000/svg", "text" );
+									/* numx = kshzb;
+									numy = bjzzb; */
+									//kshzb = x2 + tingchetime;
+									var b2y;
+									if(direction[0].checked){
+										b2y = a[1]+18;
+									}else{
+										b2y = a[1]-4;
+									}
+									b2.setAttribute( "text-anchor", "middle" );
+									b2.setAttribute( "x", kshzb );
+									b2.setAttribute( "y", b2y );
+									b2.setAttribute( "style", "fill:black" );
+									b2.textContent =parseInt((kshzb-50)%40/4);
+									g1.appendChild( b2 );
+									
+									var c1 = document.createElementNS( "http://www.w3.org/2000/svg", "text" );
+									/* numx = kshzb;
+									numy = bjzzb; */
+									//kshzb = x2 + tingchetime;
+									var c1y;
+									if(direction[0].checked){
+										c1y = a[2]-4;
+									}else{
+										c1y = a[2]+18;
+									}
+									c1.setAttribute( "text-anchor", "middle" );
+									c1.setAttribute( "x", x2 );
+									c1.setAttribute( "y", c1y );
+									c1.setAttribute( "style", "fill:black" );
+									c1.textContent =parseInt((x2-50)%40/4);
+									g1.appendChild( c1 );
+									
+								}
+									
+								
+								
+								
+									
+								
+							}/* else{
+								var line2 = document.createElementNS( "http://www.w3.org/2000/svg", "line" );
+								kshzb = x2;
+								line2.setAttribute( "x1", kshzb );
+								line2.setAttribute( "y1", a[1] );
+								x2 = (a[2]-a[1])*k+kshzb
+								line2.setAttribute( "x2", x2 );
+								line2.setAttribute( "y2", a[2] );
+								line2.setAttribute( "style", "stroke-width:1;stroke:rgb(0,0,0)" );
+								g1.appendChild( line2 );
+								
+								var a_1 = document.createElementNS( "http://www.w3.org/2000/svg", "text" );
+								
+								a_1.setAttribute( "text-anchor", "middle" );
+								a_1.setAttribute( "x", x2 );
+								a_1.setAttribute( "y", a[2]-4 );
+								a_1.setAttribute( "style", "fill:black" );
+								a_1.textContent = parseInt((x2-50)%40/4);
+								g1.appendChild( a_1 );
+								
+							} */
+								
+							if(a[3]!=0){
+								if(b[2]==0){
+									var line3 = document.createElementNS( "http://www.w3.org/2000/svg", "line" );
+									kshzb = x2;
+									line3.setAttribute( "x1", kshzb );
+									line3.setAttribute( "y1", a[2] );
+									if(direction[0].checked){
+										x2 = (a[3]-a[2])*k+kshzb;
+									}else{
+										x2 = (Math.abs(a[3]-a[2]))*k+kshzb;
+									}
+									//x2 = (a[3]-a[2])*k+kshzb;
+									line3.setAttribute( "x2", x2 );
+									line3.setAttribute( "y2", a[3] );
+									line3.setAttribute( "style", "stroke-width:1;stroke:rgb(0,0,0)" );
+									g1.appendChild( line3 );
+									
+									var d1 = document.createElementNS( "http://www.w3.org/2000/svg", "text" );
+									/* numx = kshzb;
+									numy = bjzzb; */
+									var d1y;
+									if(direction[0].checked){
+										d1y = a[3]-4;
+									}else{
+										d1y = a[3]+18;
+									}
+									d1.setAttribute( "text-anchor", "middle" );
+									d1.setAttribute( "x", x2 );
+									d1.setAttribute( "y", d1y );
+									d1.setAttribute( "style", "fill:black" );
+									d1.textContent =parseInt((x2-50)%40/4);
+									g1.appendChild( d1 );
+								}else{
+									var line3 = document.createElementNS( "http://www.w3.org/2000/svg", "line" );
+									kshzb = x2+tingchetime;
+									line3.setAttribute( "x1", kshzb );
+									line3.setAttribute( "y1", a[2] );
+									if(direction[0].checked){
+										x2 = (a[3]-a[2])*k+kshzb;
+									}else{
+										x2 = (Math.abs(a[3]-a[2]))*k+kshzb;
+									}
+									//x2 = (a[3]-a[2])*k+kshzb;
+									line3.setAttribute( "x2", x2 );
+									line3.setAttribute( "y2", a[3] );
+									line3.setAttribute( "style", "stroke-width:1;stroke:rgb(0,0,0)" );
+									g1.appendChild( line3 );
+									
+									var c2 = document.createElementNS( "http://www.w3.org/2000/svg", "text" );
+									/* numx = kshzb;
+									numy = bjzzb; */
+									//kshzb = x2 + tingchetime;
+									var c2y;
+									if(direction[0].checked){
+										c2y = a[2]+18;
+									}else{
+										c2y = a[2]-4;
+									}
+									c2.setAttribute( "text-anchor", "middle" );
+									c2.setAttribute( "x", kshzb );
+									c2.setAttribute( "y", c2y );
+									c2.setAttribute( "style", "fill:black" );
+									c2.textContent =parseInt((kshzb-50)%40/4);
+									g1.appendChild( c2 );
+									
+									var c1 = document.createElementNS( "http://www.w3.org/2000/svg", "text" );
+									/* numx = kshzb;
+									numy = bjzzb; */
+									//kshzb = x2 + tingchetime;
+									var c1y;
+									if(direction[0].checked){
+										c1y = a[3]-4;
+									}else{
+										c1y = a[3]+18;
+									}
+									c1.setAttribute( "text-anchor", "middle" );
+									c1.setAttribute( "x", x2 );
+									c1.setAttribute( "y",c1y );
+									c1.setAttribute( "style", "fill:black" );
+									c1.textContent =parseInt((x2-50)%40/4);
+									g1.appendChild( c1 );
+									
+								}
+									
+								
+								
+								
+									
+								
+							}
+								
+							
+							
+							if(a[4]!=0){
+								if(b[3]==0){
+									var line4 = document.createElementNS( "http://www.w3.org/2000/svg", "line" );
+									kshzb = x2;
+									line4.setAttribute( "x1", kshzb );
+									line4.setAttribute( "y1", a[3] );
+									if(direction[0].checked){
+										x2 = (a[4]-a[3])*k+kshzb;
+									}else{
+										x2 = (Math.abs(a[4]-a[3]))*k+kshzb;
+									}
+									//x2 = (a[4]-a[3])*k+kshzb;
+									line4.setAttribute( "x2", x2 );
+									line4.setAttribute( "y2", a[4] );
+									line4.setAttribute( "style", "stroke-width:1;stroke:rgb(0,0,0)" );
+									g1.appendChild( line4 );
+									
+									var e1 = document.createElementNS( "http://www.w3.org/2000/svg", "text" );
+									/* numx = kshzb;
+									numy = bjzzb; */
+									var e1y;
+									if(direction[0].checked){
+										e1y = a[4]-4;
+									}else{
+										e1y = a[4]+18;
+									}
+									e1.setAttribute( "text-anchor", "middle" );
+									e1.setAttribute( "x", x2 );
+									e1.setAttribute( "y", e1y );
+									e1.setAttribute( "style", "fill:black" );
+									e1.textContent =parseInt((x2-50)%40/4);
+									g1.appendChild( e1 );
+								}else{
+									var line4 = document.createElementNS( "http://www.w3.org/2000/svg", "line" );
+									kshzb = x2+tingchetime;
+									line4.setAttribute( "x1", kshzb );
+									line4.setAttribute( "y1", a[3] );
+									if(direction[0].checked){
+										x2 = (a[4]-a[3])*k+kshzb;
+									}else{
+										x2 = (Math.abs(a[4]-a[3]))*k+kshzb;
+									}
+									//x2 = (a[4]-a[3])*k+kshzb;
+									line4.setAttribute( "x2", x2 );
+									line4.setAttribute( "y2", a[4] );
+									line4.setAttribute( "style", "stroke-width:1;stroke:rgb(0,0,0)" );
+									g1.appendChild( line4 );
+									
+									var d2 = document.createElementNS( "http://www.w3.org/2000/svg", "text" );
+									/* numx = kshzb;
+									numy = bjzzb; */
+									//kshzb = x2 + tingchetime;
+									var d2y;
+									if(direction[0].checked){
+										d2y = a[3]+18;
+									}else{
+										d2y = a[3]-4;
+									}
+									d2.setAttribute( "text-anchor", "middle" );
+									d2.setAttribute( "x", kshzb );
+									d2.setAttribute( "y", d2y );
+									d2.setAttribute( "style", "fill:black" );
+									d2.textContent =parseInt((kshzb-50)%40/4);
+									g1.appendChild( d2 );
+									
+									var e1 = document.createElementNS( "http://www.w3.org/2000/svg", "text" );
+									/* numx = kshzb;
+									numy = bjzzb; */
+									//kshzb = x2 + tingchetime;
+									var e1y;
+									if(direction[0].checked){
+										e1y = a[4]-4;
+									}else{
+										e1y = a[4]+18;
+									}
+									e1.setAttribute( "text-anchor", "middle" );
+									e1.setAttribute( "x", x2 );
+									e1.setAttribute( "y", e1y );
+									e1.setAttribute( "style", "fill:black" );
+									e1.textContent =parseInt((x2-50)%40/4);
+									g1.appendChild( e1 );
+									
+								}
+									
+								
+								
+								
+									
+								
+							}
+						}	
+							
+							
+						}//这个是else的分号
+					
+					
+					
+					
+				};
+				
+			};
+			
+		</script>
+	</head>
+	<body>
+		<div class="jiemian">
+			<div class="biaoti">
+				<h1>欢迎登陆列车运行图管理系统！</h1>
+			</div>
+			<div class="biaoge">
+			<p>请勾选经停车站：<br /> (包括起点和终点站)</p>
+			
+			<form >
+				<label for="bj">北京南站</label>
+				<input id="bj" type="checkbox" name="station" />
+				<br />
+				<label for="tj">天津南站</label>
+				<input id="tj" type="checkbox" name="station" />
+				<br />
+				<label for="jn">济南西站</label>
+				<input id="jn" type="checkbox" name="station" />
+				<br />
+				<label for="nj">南京南站</label>
+				<input id="nj" type="checkbox" name="station" />
+				<br />
+				<label for="sh">上海虹桥</label>
+				<input id="sh" type="checkbox" name="station" />	
+				<br />
+				
+			    <p>请选择停站时间：</p>
+				<select id="stoptime">
+					<option value="twominute">2分钟</option>
+					<option value="fiveminute">5分钟</option>
+					<!-- <option value="tenminute">10分钟</option> -->
+				</select>
+				
+				<p>请选择运行速度：</p>
+				<select id="speed">
+					<option value="xielv1">250km/h</option>
+					<option value="xielv2">350km/h</option>
+					<!-- <option value="tenminute">10分钟</option> -->
+				</select>
+				
+			    <p>请勾选运行方向：</p>
+				<label id="shangxing">下行</label>
+				<input id="shangxing" type="radio" name="direction" value="xia"/>
+				<label id="xiaxing">上行</label>
+				<input id="xiaxing" type="radio" name="direction" value="shang"/>
+				<br />
+				
+				
+				<br />
+			</form>
+			<button id="butt">生成列车运行图</button>
+			<br /><br />
+			<button id="del">清空运行图</button>
+			</div>
+			<div class="yunxingtu" >
+				
+				<!-- <img src="img/1.svg" /> -->
+				
+				<svg xmlns="http://www.w3.org/2000/svg" id="main" width="100%" height="100%">
+					<!-- 车站名 -->
+					<g id="chezhan" font-size="16" text-anchor="end" fill="black">
+					<text x="40" y="55" id="beijing" >北京</text>
+					<text x="40" y="125" >天津</text>
+					<text x="40" y="235" >济南</text>
+					<text x="40" y="355" >南京</text>
+					<text x="40" y="455" >上海</text>
+					</g>
+					
+					<!-- 小时刻度 -->
+					<g>
+					<text x="50" y="45" fill="black" font-size="16" text-anchor="middle">8</text>
+					<text x="290" y="45" fill="black" font-size="16" text-anchor="middle">9</text>
+					<text x="530" y="45" fill="black" font-size="16" text-anchor="middle">10</text>
+					<text x="770" y="45" fill="black" font-size="16" text-anchor="middle">11</text>
+					</g>
+					
+					
+					<!-- 横线 -->
+					<g id="hengxian">
+					<line x1="50" y1="50"  x2="780"  y2="50" stroke="black" ></line>
+					<line x1="50" y1="120" x2="780" y2="120" stroke="black" ></line>
+					<line x1="50" y1="230" x2="780" y2="230" stroke="black" ></line>
+					<line x1="50" y1="350" x2="780" y2="350" stroke="black" ></line>
+					<line x1="50" y1="450" x2="780" y2="450" stroke="black" ></line>
+					</g>
+					
+						
+					
+						
+						
+						
+					<!-- 竖线 -->
+					<g id="shuxian" stroke="black">
+						<line x1="50" y1="50" x2="50" y2="450"  stroke-width="2"></line>
+						<line x1="90" y1="50" x2="90" y2="450"  ></line>  
+						<line x1="130" y1="50" x2="130" y2="450"></line>
+						<line x1="170" y1="50" x2="170" y2="450" stroke-dasharray="6,6" stroke-width="2"></line>
+						<line x1="210" y1="50" x2="210" y2="450"></line>
+						<line x1="250" y1="50" x2="250" y2="450"></line>
+						
+						
+						<line x1="290" y1="50" x2="290" y2="450" stroke-width="2"></line>
+						<line x1="330" y1="50" x2="330" y2="450" ></line>
+						<line x1="370" y1="50" x2="370" y2="450" ></line>
+						<line x1="410" y1="50" x2="410" y2="450" stroke-dasharray="6,6" stroke-width="2"></line>
+						<line x1="450" y1="50" x2="450" y2="450" ></line>
+						<line x1="490" y1="50" x2="490" y2="450" ></line>
+						
+						
+						<line x1="530" y1="50" x2="530" y2="450" stroke-width="2"></line>
+						<line x1="570" y1="50" x2="570" y2="450" ></line>
+						<line x1="610" y1="50" x2="610" y2="450" ></line>
+						<line x1="650" y1="50" x2="650" y2="450" stroke-dasharray="6,6" stroke-width="2"></line>
+						<line x1="690" y1="50" x2="690" y2="450" ></line>
+						<line x1="730" y1="50" x2="730" y2="450" ></line>
+						
+						
+						<line x1="770" y1="50" x2="770" y2="450" stroke-width="2"></line>
+					</g>
+					
+					
+					
+					<!-- 折线 -->
+					
+						<!-- points="50,50 169,120 173,120 358,230" -->
+						<!-- <polyline id="zhexian"  style="fill:none;stroke:black;stroke-width:1" /> -->
+					<!-- <g id="g1">	
+					</g>
+					 -->
+					
+					
+					
+					
+					<!-- <rect width="700" height="400" x="50" y="50" fill="transparent" stroke="black"></rect> -->
+					
+				</svg>
+			</div>
+			
+		</div>
+		
+			
+		
+		
+	</body>
+</html>
